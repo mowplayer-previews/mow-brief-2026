@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mow Brief · Desktop y Mobile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;1,800&family=Nunito:wght@800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   MOW BRIEF · modelo de producto
+   - Desktop (>= 760px): unidad 960x150, sin ad, lista desplegable.
+   - Mobile (< 760px):  unidad 300x300 (208 reproductor + 92 ad).
+   Todo lo editable está en CONFIG (abajo, en el <script>).
+   ============================================================ */
+:root{
+  --brief:#14286B;          /* color de fondo del reproductor */
+  --mow:#FF7AA5;            /* color de la firma mow */
+  --ad:#1A0A2C;
+  --f:"Poppins",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:var(--f);background:#F3F4F6;color:#1E2026;padding:40px 16px}
+.sw{display:flex;justify-content:center;gap:12px;margin:0 auto 32px}
+.sw button{font:600 15px/1 var(--f);padding:14px 24px;border-radius:999px;border:1px solid #D5D9DF;background:#fff;color:#15171A;cursor:pointer}
+.sw button[aria-pressed="true"]{background:#14101F;border-color:#14101F;color:#fff}
+.sw button:focus-visible{outline:2px solid #E91E63;outline-offset:3px}
+body{background:#ECEAEE}
+
+/* ---------- contenedor ---------- */
+.mb{position:relative;margin:0 auto;color:#fff;font-family:var(--f)}
+.mb-unit{position:relative;display:flex;overflow:hidden;border-radius:10px;box-shadow:0 8px 22px rgba(16,24,40,.22)}
+.mb-panel{position:relative;overflow:hidden;background:var(--brief);display:flex;flex:1;min-width:0}
+.mb-panel::after{content:"";position:absolute;top:-90px;left:58%;width:80px;height:380px;background:rgba(255,255,255,.07);transform:rotate(22deg);pointer-events:none}
+.mb-panel > *{position:relative;z-index:1}
+
+/* desktop */
+.mb.is-d{width:960px;max-width:100%}
+.mb.is-d .mb-unit{height:150px}
+.mb.is-d .mb-panel{align-items:center;gap:18px;padding:0 20px 0 18px}
+/* mobile */
+.mb.is-m{width:300px}
+.mb.is-m .mb-unit{height:300px;flex-direction:column}
+.mb.is-m .mb-panel{flex:none;height:208px;flex-direction:column;gap:8px;padding:12px 14px}
+
+/* ---------- piezas ---------- */
+.mb-play{flex:none;border:0;border-radius:50%;background:#fff;color:var(--brief);display:grid;place-items:center;cursor:pointer}
+.mb.is-d .mb-play{width:58px;height:58px;box-shadow:0 0 0 7px rgba(255,255,255,.14)}
+.mb.is-m .mb-play{width:46px;height:46px;box-shadow:0 0 0 5px rgba(255,255,255,.14)}
+.mb-play svg{width:20px;height:20px}
+.mb-play .i-pause{display:none}
+.mb.playing .mb-play .i-play{display:none}
+.mb.playing .mb-play .i-pause{display:block}
+.mb-play:focus-visible,.mb button:focus-visible,.mb a:focus-visible{outline:2px solid var(--mow);outline-offset:3px}
+
+.mb-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.mb-eyebrow{display:flex;justify-content:space-between;font-size:9px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.82)}
+.mb.is-d .mb-eyebrow{font-size:12px;letter-spacing:1.4px}
+.mb-eyebrow b{color:#fff;font-weight:600}
+
+.mb-trow{display:flex;align-items:flex-start;gap:10px;min-width:0}
+.mb-title{flex:0 1 auto;min-width:0;color:#fff;text-decoration:none;font-weight:700;overflow:hidden;white-space:nowrap}
+.mb-title span{display:inline-block}
+.mb.is-d .mb-title{font-size:19px;line-height:1.25;white-space:normal}
+.mb.is-d .mb-title span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mb.is-m .mb-title{font-size:15px;line-height:1.3}
+.mb-title:hover span{text-decoration:underline}
+.mb-read{flex:none;margin-top:5px;font-size:10px;font-weight:600;padding:3px 8px;border-radius:999px;background:rgba(255,255,255,.14);color:#fff;text-decoration:none;white-space:nowrap}
+.mb-read:hover{background:rgba(255,255,255,.24)}
+
+/* marquesina (se activa sola si el texto no entra) */
+.mq{overflow:hidden;white-space:nowrap}
+.mq > span{display:inline-block}
+.mq.run > span{animation:mbmq var(--d,8s) linear infinite alternate}
+@keyframes mbmq{0%,12%{transform:translateX(0)}88%,100%{transform:translateX(var(--x,0))}}
+@media (prefers-reduced-motion: reduce){.mq.run > span{animation:none}}
+
+.mb-row{display:flex;align-items:center;gap:10px}
+.mb-wave{flex:1;display:flex;align-items:center;gap:2px}
+.mb.is-d .mb-wave{height:28px}
+.mb.is-m .mb-wave{height:30px}
+.mb-wave i{flex:1;border-radius:2px;background:rgba(255,255,255,.32);transition:background .2s}
+.mb-wave i.on{background:#fff}
+.mb-wave i.gap{margin-left:4px}
+
+.mb-meta{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:10px;color:rgba(255,255,255,.85);font-variant-numeric:tabular-nums;white-space:nowrap}
+.mb.is-d .mb-meta{font-size:13px}
+.mb-next{display:flex;align-items:baseline;gap:8px;font-size:10px;color:rgba(255,255,255,.78)}
+.mb-next .mq{flex:1;min-width:0}
+
+.mb-speed{flex:none;display:flex;padding:2px;gap:1px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22)}
+.mb-speed button{min-width:32px;height:24px;padding:0 6px;border:0;border-radius:999px;background:transparent;color:#fff;font:700 10px/1 var(--f);cursor:pointer}
+.mb.is-m .mb-speed button{min-width:28px;height:24px;padding:0 4px}
+.mb-speed button[aria-pressed="true"]{background:#fff;color:var(--brief)}
+
+.mb-tog{display:inline-flex;align-items:center;gap:5px;border:0;border-radius:999px;background:rgba(255,255,255,.14);color:#fff;font:600 10px/1 var(--f);padding:5px 9px;cursor:pointer;white-space:nowrap}
+.mb.is-d .mb-tog{font-size:11px;padding:5px 10px}
+.mb-tog svg{transition:transform .2s}
+.mb-tog[aria-expanded="true"] svg{transform:rotate(180deg)}
+
+.mb-sign{font:800 12px/1 "Nunito",var(--f);color:var(--mow)}
+.mb.is-d .mb-sign{position:absolute;right:16px;bottom:10px;font-size:15px}
+
+/* ad (solo mobile) */
+.mb-ad{position:relative;overflow:hidden;flex:none;height:92px;background:var(--ad);color:#fff;text-decoration:none;display:block}
+.mb.is-d .mb-ad{display:none}
+.mb-ad::before{content:"";position:absolute;top:-40px;left:170px;width:40px;height:200px;background:rgba(233,30,99,.18);transform:rotate(24deg)}
+.mb-ad > *{position:absolute}
+.mb-ad .mw{left:12px;top:8px;font:800 12px/1 "Nunito",var(--f)}
+.mb-ad .hl{left:12px;top:26px;font-style:italic;font-weight:800;font-size:13px;line-height:1.1;text-transform:uppercase}
+.mb-ad .hl em{color:#FF4F93;font-style:italic}
+.mb-ad .tag{right:10px;top:8px;font-size:9px;font-weight:700;font-style:italic}
+.mb-ad .cta{right:10px;bottom:10px;padding:6px 10px;border-radius:4px;background:linear-gradient(90deg,#E91E63,#9C27B0);font-size:10px;font-weight:700}
+
+/* lista desplegable */
+.mb-list{background:var(--brief);border-radius:0 0 10px 10px;margin-top:-8px;padding:14px 18px 12px;box-shadow:0 10px 22px rgba(16,24,40,.22)}
+.mb-list[hidden]{display:none}
+.mb.is-m .mb-list{padding:10px 12px 8px}
+.mb-list ul{list-style:none;margin:0;padding:0}
+.mb-list li{display:flex;align-items:center;gap:12px;border-top:1px solid rgba(255,255,255,.12)}
+.mb-list li:first-child{border-top:0}
+.mb-list .go{flex:1;min-width:0;display:flex;align-items:center;gap:12px;padding:10px 4px;border:0;background:transparent;color:#fff;text-align:left;font:500 14px/1.35 var(--f);cursor:pointer}
+.mb.is-m .mb-list .go{font-size:12px;gap:9px;padding:8px 2px}
+.mb-list .go::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.45)}
+.mb-list li.on .go{font-weight:700}
+.mb-list li.on .go::before{background:var(--mow);box-shadow:0 0 0 4px rgba(255,122,165,.25)}
+.mb-list .dur{flex:none;font-size:11px;color:rgba(255,255,255,.7);font-variant-numeric:tabular-nums}
+.mb-list .rd{flex:none;color:#fff;font-size:11px;font-weight:600}
+.mb.is-m .mb-list .rd{display:none}
+</style>
+</head>
+<body>
+
+<div class="sw" role="group" aria-label="Vista"><button type="button" id="v-d" aria-pressed="true">Desktop · 960×150</button><button type="button" id="v-m" aria-pressed="false">Mobile · 300×300</button></div>
+
+<!-- ===== MOW BRIEF ===== -->
+<div class="mb" id="mow-brief" role="region" aria-label="Mow Brief: las 5 noticias del día en audio">
+  <div class="mb-unit">
+    <div class="mb-panel" data-panel></div>
+    <a class="mb-ad" href="#" target="_blank" rel="noopener" aria-label="Publicidad">
+      <span class="mw">mow</span>
+      <span class="hl">Your next ad.<br>The right moment.<br><em>Mow receptivity.</em></span>
+      <span class="tag">#AD</span>
+      <span class="cta">LEARN MORE</span>
+    </a>
+  </div>
+  <div class="mb-list" id="mb-list" hidden><ul data-list></ul></div>
+</div>
+
+<script>
+/* ============================================================
+   CONFIG · lo único que hay que tocar por medio
+   ============================================================ */
+var CONFIG = {
+  fecha: 'Mar 20 oct',
+  color: '#14286B',                 // fondo del reproductor
+  tituloInicial: 'Las 5 noticias de hoy, en audio',
+  audio: null,                      // URL del mp3 del resumen (opcional; sin audio simula el avance)
+  noticias: [                       // inicio y duración en segundos dentro del audio
+    { titulo: 'Lluvias en Santiago: lo que dejó el sistema frontal y lo que viene', url: '#', inicio: 0,   dur: 62 },
+    { titulo: 'Senapred decreta alerta roja en la Región Metropolitana',           url: '#', inicio: 62,  dur: 55 },
+    { titulo: 'Metro de Santiago cierra una estación de la Línea 2 por acumulación de agua', url: '#', inicio: 117, dur: 58 },
+    { titulo: 'Granizada en Maipú y San Bernardo: calles anegadas en 15 minutos',  url: '#', inicio: 175, dur: 52 },
+    { titulo: 'Anuncian prolongado corte de agua en la Región Metropolitana',      url: '#', inicio: 227, dur: 48 }
+  ]
+};
+
+(function(){
+  var root=document.getElementById('mow-brief'), panel=root.querySelector('[data-panel]');
+  var N=CONFIG.noticias, TOTAL=N[N.length-1].inicio+N[N.length-1].dur;
+  var pos=0, playing=false, speed=1, mode=null, audio=null;
+  root.style.setProperty('--brief',CONFIG.color);
+  if(CONFIG.audio){audio=new Audio(CONFIG.audio);audio.preload='none';audio.addEventListener('ended',function(){playing=false;render()})}
+
+  function fmt(s){s=Math.floor(s);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}
+  function cur(){var c=0;for(var k=0;k<N.length;k++){if(pos>=N[k].inicio)c=k}return c}
+  function esc(t){return String(t).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]})}
+
+  var ICON_PLAY='<svg class="i-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="margin-left:3px"><path d="M7 4.5v15a1 1 0 0 0 1.52.85l12-7.5a1 1 0 0 0 0-1.7l-12-7.5A1 1 0 0 0 7 4.5z"/></svg>';
+  var ICON_PAUSE='<svg class="i-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4.5" width="4" height="15" rx="1.2"/><rect x="14" y="4.5" width="4" height="15" rx="1.2"/></svg>';
+  var CHEV='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
+  var SPEED='<div class="mb-speed" role="group" aria-label="Velocidad"><button type="button" data-sp="1" aria-pressed="true">x1</button><button type="button" data-sp="1.5" aria-pressed="false">x1,5</button><button type="button" data-sp="2" aria-pressed="false">x2</button></div>';
+  var TOG='<button class="mb-tog" type="button" aria-expanded="false" aria-controls="mb-list">Ver las 5 noticias '+CHEV+'</button>';
+  var PLAY='<button class="mb-play" type="button" aria-label="Escuchar resumen">'+ICON_PLAY+ICON_PAUSE+'</button>';
+
+  function wave(n){
+    var h='',last=0;
+    for(var i=0;i<n;i++){var t=(i+.5)/n*TOTAL,c=0;for(var k=0;k<N.length;k++){if(t>=N[k].inicio)c=k}
+      h+='<i data-t="'+t+'" class="'+(i>0&&c!==last?'gap':'')+'" style="height:'+(3+Math.round(Math.abs(Math.sin(i*1.7)*.6+Math.sin(i*.37)*.4)*22))+'px"></i>';last=c}
+    return '<div class="mb-wave" aria-hidden="true">'+h+'</div>';
+  }
+
+  function build(m){
+    mode=m; root.classList.toggle('is-d',m==='d'); root.classList.toggle('is-m',m==='m');
+    var eyebrow='<div class="mb-eyebrow"><span>Tu día en 5 minutos</span><b>'+esc(CONFIG.fecha)+'</b></div>';
+    var title='<a class="mb-title'+(m==='m'?' mq':'')+'" href="#" data-read><span data-title></span></a>';
+    if(m==='d'){
+      panel.innerHTML=PLAY+'<div class="mb-info">'+eyebrow+
+        '<div class="mb-trow">'+title+'<a class="mb-read" href="#" data-read>Leer nota ›</a></div>'+
+        wave(120)+'<div class="mb-meta"><span data-meta></span>'+TOG+'</div></div>'+SPEED+'<span class="mb-sign">mow</span>';
+    }else{
+      panel.innerHTML=eyebrow+title+'<div class="mb-row">'+PLAY+wave(32)+SPEED+'</div>'+
+        '<div class="mb-meta"><span data-meta></span></div>'+
+        '<div class="mb-next"><span class="mq"><span data-next></span></span><span class="mb-sign">mow</span></div>'+
+        '<div class="mb-meta">'+TOG+'<a class="mb-read" href="#" data-read style="margin:0">Leer nota completa ›</a></div>';
+    }
+    root.querySelector('[data-list]').innerHTML=N.map(function(n,i){
+      return '<li><button type="button" class="go" data-go="'+i+'">'+esc(n.titulo)+'</button><span class="dur">'+fmt(n.dur)+'</span><a class="rd" href="'+esc(n.url)+'" target="_blank" rel="noopener">Leer ›</a></li>';
+    }).join('');
+    bind(); render();
+  }
+
+  function setPos(p){pos=Math.max(0,Math.min(TOTAL,p)); if(audio){try{audio.currentTime=pos}catch(e){}}}
+  function play(on){playing=on; if(audio){audio.playbackRate=speed; on?audio.play().catch(function(){}):audio.pause()}}
+
+  function bind(){
+    root.querySelector('.mb-play').onclick=function(){ if(pos>=TOTAL){setPos(0);play(true)} else play(!playing); render() };
+    root.querySelectorAll('.mb-speed button').forEach(function(b){b.onclick=function(){
+      speed=+b.dataset.sp; if(audio)audio.playbackRate=speed;
+      root.querySelectorAll('.mb-speed button').forEach(function(x){x.setAttribute('aria-pressed',+x.dataset.sp===speed)});
+    }});
+    root.querySelector('.mb-tog').onclick=function(){
+      var t=this, l=document.getElementById('mb-list'), open=t.getAttribute('aria-expanded')!=='true';
+      t.setAttribute('aria-expanded',open); l.hidden=!open;
+    };
+    root.querySelectorAll('[data-go]').forEach(function(b){b.onclick=function(){setPos(N[+b.dataset.go].inicio);play(true);render()}});
+    root.querySelectorAll('[data-read]').forEach(function(a){a.onclick=function(e){var u=N[cur()].url; if(!u||u==='#'){e.preventDefault()} else {a.href=u;a.target='_blank'}}});
+  }
+
+  function marquee(){
+    root.querySelectorAll('.mq').forEach(function(t){
+      var sp=t.firstElementChild,over=sp.scrollWidth-t.clientWidth;
+      if(over>4){t.style.setProperty('--x',(-over-8)+'px');t.style.setProperty('--d',Math.max(5,over/30+3)+'s');t.classList.add('run')}
+      else t.classList.remove('run');
+    });
+  }
+
+  function render(){
+    var c=cur(), started=pos>0||playing, done=pos>=TOTAL;
+    root.classList.toggle('playing',playing);
+    root.querySelector('.mb-play').setAttribute('aria-label',playing?'Pausar':(done?'Volver a escuchar':'Escuchar resumen'));
+    root.querySelector('[data-title]').textContent = done?'Escuchaste las 5 noticias de hoy':(started?N[c].titulo:CONFIG.tituloInicial+' · '+fmt(TOTAL));
+    root.querySelector('[data-meta]').textContent = (started?'Noticia '+(c+1)+' de '+N.length:N.length+' noticias')+' · '+fmt(pos)+' / '+fmt(TOTAL);
+    var nx=root.querySelector('[data-next]'); if(nx) nx.textContent = started?('Sigue: '+(c<N.length-1?N[c+1].titulo:'fin de la edición')):('Empieza: '+N[0].titulo);
+    root.querySelectorAll('.mb-wave i').forEach(function(b){b.classList.toggle('on',+b.dataset.t<=pos)});
+    root.querySelectorAll('[data-list] li').forEach(function(li,i){li.classList.toggle('on',started&&i===c)});
+    marquee();
+  }
+
+  setInterval(function(){
+    if(!playing) return;
+    if(audio){pos=audio.currentTime} else {pos=Math.min(TOTAL,pos+speed); if(pos>=TOTAL) playing=false}
+    render();
+  },1000);
+
+  function setView(m){
+    document.getElementById('v-d').setAttribute('aria-pressed',m==='d');
+    document.getElementById('v-m').setAttribute('aria-pressed',m==='m');
+    var t=root.querySelector('.mb-tog'); if(t) t.setAttribute('aria-expanded','false');
+    document.getElementById('mb-list').hidden=true;
+    build(m);
+  }
+  document.getElementById('v-d').onclick=function(){setView('d')};
+  document.getElementById('v-m').onclick=function(){setView('m')};
+  setView(window.innerWidth<760?'m':'d');
+})();
+</script>
+</body>
+</html>
